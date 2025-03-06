@@ -1,75 +1,464 @@
+آدرس فایل: /templates/header.php
+
+php
+Copy
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>برنامه حسابداری فروشگاه</title>
+    <!-- لینک CDN Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+    <header class="bg-blue-600 text-white py-4">
+        <div class="container mx-auto px-4">
+            <h1 class="text-2xl font-bold">برنامه حسابداری فروشگاه</h1>
+            <nav class="mt-2">
+                <ul class="flex space-x-4">
+                    <li><a href="<?php echo SITE_URL; ?>/index.php" class="hover:text-blue-200">خانه</a></li>
+                    
+                    <!-- منوی کالا و خدمات -->
+                    <li class="relative group">
+                        <a href="#" class="hover:text-blue-200">کالا و خدمات</a>
+                        <!-- زیرمنو -->
+                        <ul class="absolute hidden bg-white text-gray-800 rounded-lg shadow-md mt-2 group-hover:block">
+                            <li><a href="<?php echo SITE_URL; ?>/src/products/add_product.php" class="block px-4 py-2 hover:bg-blue-100">افزودن محصول</a></li>
+                            <li><a href="<?php echo SITE_URL; ?>/src/products/products.php" class="block px-4 py-2 hover:bg-blue-100">لیست محصولات</a></li>
+                            <li><a href="<?php echo SITE_URL; ?>/src/services/add_service.php" class="block px-4 py-2 hover:bg-blue-100">افزودن خدمات</a></li>
+                            <li><a href="<?php echo SITE_URL; ?>/src/services/services.php" class="block px-4 py-2 hover:bg-blue-100">لیست خدمات</a></li>
+                        </ul>
+                    </li>
+                    
+                    <li><a href="<?php echo SITE_URL; ?>/src/sales/sales.php" class="hover:text-blue-200">فروش</a></li>
+                    <li><a href="<?php echo SITE_URL; ?>/src/feedbacks/feedbacks.php" class="hover:text-blue-200">بازخوردها</a></li>
+                    <li><a href="<?php echo SITE_URL; ?>/src/chat/chat.php" class="hover:text-blue-200">چت</a></li>
+                    <li><a href="<?php echo SITE_URL; ?>/src/events/events.php" class="hover:text-blue-200">رویدادها</a></li>
+                    <li><a href="<?php echo SITE_URL; ?>/src/users/users.php" class="hover:text-blue-200">کاربران</a></li>
+                    <li><a href="<?php echo SITE_URL; ?>/src/payment/payment.php" class="hover:text-blue-200">پرداخت</a></li>
+                    <li><a href="<?php echo SITE_URL; ?>/src/reports/advanced_reports.php" class="hover:text-blue-200">گزارش‌ها</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    ساختار پوشه‌ها:
+Copy
 /project
-    /assets
-        /css
-            style.css        // فایل CSS اصلی (اختیاری، اگر از CDN Tailwind استفاده می‌کنید)
-    /includes
-        config.php          // تنظیمات پایه‌ای برنامه (مثل اتصال به دیتابیس)
-        db.php              // کلاس و توابع مربوط به دیتابیس
     /src
         /products
-            products.php     // مدیریت محصولات
-            edit_product.php // ویرایش محصولات
+            add_product.php  // افزودن محصول
+            products.php     // لیست محصولات
         /services
-            services.php    // مدیریت خدمات
-            edit_service.php // ویرایش خدمات
-        /sales
-            sales.php       // مدیریت فروش
-        /feedbacks
-            feedbacks.php   // مدیریت بازخوردها
-        /chat
-            chat.php        // سیستم چت
-            get_messages.php // دریافت پیام‌ها با Ajax
-        /events
-            events.php      // مدیریت رویدادها
-        /users
-            users.php       // مدیریت کاربران
-        /payment
-            payment.php     // صفحه پرداخت
-            payment_callback.php // بازگشت از درگاه پرداخت
-        /reports
-            advanced_reports.php // گزارش‌های پیشرفته
-    /templates
-        header.php          // هدر سایت (منوی ناوبری)
-        footer.php          // فوتر سایت
-    index.php              // صفحه اصلی
+            add_service.php  // افزودن خدمات
+            services.php     // لیست خدمات
 
-    توضیحات هر بخش
-پوشه assets/css:
+            آدرس فایل: /src/products/add_product.php
 
-اگر از CDN Tailwind استفاده نمی‌کنید، می‌توانید فایل‌های CSS سفارشی خود را در این پوشه قرار دهید.
+php
+Copy
+<?php
+require_once '../../includes/db.php';
+require_once '../../templates/header.php';
 
-پوشه includes:
+// افزودن محصول جدید
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
+    $name = $db->escape($_POST['name']);
+    $price = $db->escape($_POST['price']);
+    $quantity = $db->escape($_POST['quantity']);
 
-config.php: تنظیمات پایه‌ای برنامه مانند اتصال به دیتابیس.
+    $sql = "INSERT INTO products (name, price, quantity) VALUES ('$name', '$price', '$quantity')";
+    if ($db->query($sql)) {
+        echo "<p class='bg-green-100 text-green-800 p-2 rounded'>محصول با موفقیت افزوده شد.</p>";
+    } else {
+        echo "<p class='bg-red-100 text-red-800 p-2 rounded'>خطا در افزودن محصول.</p>";
+    }
+}
+?>
 
-db.php: کلاس و توابع مربوط به دیتابیس.
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-2xl font-bold mb-4">افزودن محصول</h2>
 
-پوشه src:
+    <form method="POST" action="" class="bg-white p-6 rounded-lg shadow-md">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700">نام محصول:</label>
+                <input type="text" id="name" name="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+            </div>
+            <div>
+                <label for="price" class="block text-sm font-medium text-gray-700">قیمت:</label>
+                <input type="number" id="price" name="price" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+            </div>
+            <div>
+                <label for="quantity" class="block text-sm font-medium text-gray-700">تعداد:</label>
+                <input type="number" id="quantity" name="quantity" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+            </div>
+        </div>
+        <button type="submit" name="add_product" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">افزودن محصول</button>
+    </form>
+</div>
 
-products: مدیریت محصولات (افزودن، ویرایش، حذف و نمایش محصولات).
+<?php
+require_once '../../templates/footer.php';
+?>
 
-services: مدیریت خدمات (افزودن، ویرایش، حذف و نمایش خدمات).
+2.2. فایل products.php (لیست محصولات)
+این فایل برای نمایش لیست محصولات استفاده می‌شود.
 
-sales: مدیریت فروش (ثبت فروش و نمایش فروش‌ها).
+آدرس فایل: /src/products/products.php
 
-feedbacks: مدیریت بازخوردهای مشتریان.
+php
+Copy
+<?php
+require_once '../../includes/db.php';
+require_once '../../templates/header.php';
 
-chat: سیستم چت بین کاربران.
+// نمایش محصولات
+$sql = "SELECT * FROM products";
+$result = $db->query($sql);
+?>
 
-events: مدیریت رویدادها (ثبت و نمایش رویدادها).
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-2xl font-bold mb-4">لیست محصولات</h2>
 
-users: مدیریت کاربران (افزودن، حذف و نمایش کاربران).
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <table class="min-w-full">
+            <thead class="bg-blue-600 text-white">
+                <tr>
+                    <th class="px-6 py-3 text-right">نام محصول</th>
+                    <th class="px-6 py-3 text-right">قیمت</th>
+                    <th class="px-6 py-3 text-right">تعداد</th>
+                    <th class="px-6 py-3 text-right">عملیات</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                <?php while ($row = $result->fetch_assoc()): ?>
+                <tr>
+                    <td class="px-6 py-4"><?php echo $row['name']; ?></td>
+                    <td class="px-6 py-4"><?php echo $row['price']; ?></td>
+                    <td class="px-6 py-4"><?php echo $row['quantity']; ?></td>
+                    <td class="px-6 py-4">
+                        <a href="edit_product.php?id=<?php echo $row['id']; ?>" class="text-blue-600 hover:text-blue-800">ویرایش</a>
+                        <a href="?delete_product=<?php echo $row['id']; ?>" class="text-red-600 hover:text-red-800" onclick="return confirm('آیا مطمئن هستید؟')">حذف</a>
+                    </td>
+                </tr>
+                <?php endwhile; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
 
-payment: سیستم پرداخت و بازگشت از درگاه پرداخت.
+<?php
+require_once '../../templates/footer.php';
+?>
 
-reports: گزارش‌های پیشرفته (فروش بر اساس کاربر، تخفیف و غیره).
+آدرس فایل: /src/services/add_service.php
 
-پوشه templates:
+php
+Copy
+<?php
+require_once '../../includes/db.php';
+require_once '../../templates/header.php';
 
-header.php: هدر سایت شامل منوی ناوبری.
+// افزودن خدمت جدید
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_service'])) {
+    $name = $db->escape($_POST['name']);
+    $price = $db->escape($_POST['price']);
 
-footer.php: فوتر سایت.
+    $sql = "INSERT INTO services (name, price) VALUES ('$name', '$price')";
+    if ($db->query($sql)) {
+        echo "<p class='bg-green-100 text-green-800 p-2 rounded'>خدمت با موفقیت افزوده شد.</p>";
+    } else {
+        echo "<p class='bg-red-100 text-red-800 p-2 rounded'>خطا در افزودن خدمت.</p>";
+    }
+}
+?>
 
-فایل index.php:
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-2xl font-bold mb-4">افزودن خدمات</h2>
 
-صفحه اصلی برنامه.
+    <form method="POST" action="" class="bg-white p-6 rounded-lg shadow-md">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700">نام خدمت:</label>
+                <input type="text" id="name" name="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+            </div>
+            <div>
+                <label for="price" class="block text-sm font-medium text-gray-700">قیمت:</label>
+                <input type="number" id="price" name="price" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+            </div>
+        </div>
+        <button type="submit" name="add_service" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">افزودن خدمت</button>
+    </form>
+</div>
+
+<?php
+require_once '../../templates/footer.php';
+?>
+2.4. فایل services.php (لیست خدمات)
+این فایل برای نمایش لیست خدمات استفاده می‌شود.
+
+آدرس فایل: /src/services/services.php
+
+php
+Copy
+<?php
+require_once '../../includes/db.php';
+require_once '../../templates/header.php';
+
+// نمایش خدمات
+$sql = "SELECT * FROM services";
+$result = $db->query($sql);
+?>
+
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-2xl font-bold mb-4">لیست خدمات</h2>
+
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <table class="min-w-full">
+            <thead class="bg-blue-600 text-white">
+                <tr>
+                    <th class="px-6 py-3 text-right">نام خدمت</th>
+                    <th class="px-6 py-3 text-right">قیمت</th>
+                    <th class="px-6 py-3 text-right">عملیات</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                <?php while ($row = $result->fetch_assoc()): ?>
+                <tr>
+                    <td class="px-6 py-4"><?php echo $row['name']; ?></td>
+                    <td class="px-6 py-4"><?php echo $row['price']; ?></td>
+                    <td class="px-6 py-4">
+                        <a href="edit_service.php?id=<?php echo $row['id']; ?>" class="text-blue-600 hover:text-blue-800">ویرایش</a>
+                        <a href="?delete_service=<?php echo $row['id']; ?>" class="text-red-600 hover:text-red-800" onclick="return confirm('آیا مطمئن هستید؟')">حذف</a>
+                    </td>
+                </tr>
+                <?php endwhile; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<?php
+require_once '../../templates/footer.php';
+?>
+
+1. بروزرسانی صفحه add_product.php
+صفحه add_product.php را با ویژگی‌های جدید به‌روزرسانی می‌کنیم. این صفحه شامل فیلدهای جدید، تب‌ها و دکمه‌های درخواستی خواهد بود.
+
+آدرس فایل: /src/products/add_product.php
+
+php
+Copy
+<?php
+require_once '../../includes/db.php';
+require_once '../../templates/header.php';
+
+// افزودن محصول جدید
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
+    $barcode = $db->escape($_POST['barcode']);
+    $category = $db->escape($_POST['category']);
+    $price_type = $db->escape($_POST['price_type']);
+    $price = $db->escape($_POST['price']);
+    $currency = $db->escape($_POST['currency']);
+    $initial_stock = $db->escape($_POST['initial_stock']);
+    $unit = $db->escape($_POST['unit']);
+    $description = $db->escape($_POST['description']);
+    $min_order = $db->escape($_POST['min_order']);
+    $taxable = isset($_POST['taxable']) ? 1 : 0;
+    $tax_rate = $db->escape($_POST['tax_rate']);
+
+    $sql = "INSERT INTO products (barcode, category, price_type, price, currency, initial_stock, unit, description, min_order, taxable, tax_rate) 
+            VALUES ('$barcode', '$category', '$price_type', '$price', '$currency', '$initial_stock', '$unit', '$description', '$min_order', '$taxable', '$tax_rate')";
+    if ($db->query($sql)) {
+        echo "<p class='bg-green-100 text-green-800 p-2 rounded'>محصول با موفقیت افزوده شد.</p>";
+    } else {
+        echo "<p class='bg-red-100 text-red-800 p-2 rounded'>خطا در افزودن محصول.</p>";
+    }
+}
+?>
+
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-2xl font-bold mb-4">افزودن محصول جدید</h2>
+
+    <form method="POST" action="" class="bg-white p-6 rounded-lg shadow-md">
+        <!-- بخش بارکد -->
+        <div class="mb-6">
+            <label for="barcode" class="block text-sm font-medium text-gray-700">بارکد:</label>
+            <div class="flex gap-2">
+                <input type="text" id="barcode" name="barcode" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                <button type="button" onclick="generateBarcode()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">تولید خودکار</button>
+            </div>
+        </div>
+
+        <!-- بخش دسته‌بندی -->
+        <div class="mb-6">
+            <label for="category" class="block text-sm font-medium text-gray-700">دسته‌بندی:</label>
+            <input type="text" id="category" name="category" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+        </div>
+
+        <!-- بخش قیمت فروش -->
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700">قیمت فروش:</label>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <select id="price_type" name="price_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                    <option value="عمده">عمده</option>
+                    <option value="پرسنل">پرسنل</option>
+                </select>
+                <input type="number" id="price" name="price" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                <select id="currency" name="currency" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                    <option value="تومان">تومان</option>
+                    <option value="دلار">دلار</option>
+                    <option value="یورو">یورو</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- بخش موجودی اولیه -->
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700">موجودی اولیه:</label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="number" id="initial_stock" name="initial_stock" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                <select id="unit" name="unit" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                    <option value="عدد">عدد</option>
+                    <option value="کیلوگرم">کیلوگرم</option>
+                    <option value="لیتر">لیتر</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- تب‌ها -->
+        <div class="mb-6">
+            <div class="flex space-x-4 border-b border-gray-200">
+                <button type="button" onclick="showTab('sales')" class="tab-button active">فروش</button>
+                <button type="button" onclick="showTab('inventory')" class="tab-button">موجودی</button>
+                <button type="button" onclick="showTab('tax')" class="tab-button">مالیات</button>
+            </div>
+
+            <!-- تب فروش -->
+            <div id="sales-tab" class="tab-content">
+                <label for="description" class="block text-sm font-medium text-gray-700 mt-4">توضیحات فروش:</label>
+                <textarea id="description" name="description" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
+            </div>
+
+            <!-- تب موجودی -->
+            <div id="inventory-tab" class="tab-content hidden">
+                <label for="min_order" class="block text-sm font-medium text-gray-700 mt-4">حداقل سفارش:</label>
+                <input type="number" id="min_order" name="min_order" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                <p class="text-red-500 text-sm mt-2 hidden" id="min-order-warning">توجه: حداقل سفارش کمتر از مقدار مجاز است!</p>
+            </div>
+
+            <!-- تب مالیات -->
+            <div id="tax-tab" class="tab-content hidden">
+                <div class="mt-4">
+                    <label for="taxable" class="block text-sm font-medium text-gray-700">مشمول مالیات:</label>
+                    <input type="checkbox" id="taxable" name="taxable" class="mt-1">
+                </div>
+                <div class="mt-4">
+                    <label for="tax_rate" class="block text-sm font-medium text-gray-700">درصد مالیات:</label>
+                    <input type="number" id="tax_rate" name="tax_rate" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                </div>
+            </div>
+        </div>
+
+        <!-- دکمه‌ها -->
+        <div class="flex gap-4">
+            <button type="button" onclick="printBarcode()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">چاپ بارکد</button>
+            <button type="submit" name="add_product" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">ذخیره و جدید</button>
+        </div>
+    </form>
+</div>
+
+<script>
+// تابع تولید خودکار بارکد
+function generateBarcode() {
+    const barcode = Math.floor(100000000000 + Math.random() * 900000000000);
+    document.getElementById('barcode').value = barcode;
+}
+
+// تابع نمایش تب‌ها
+function showTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+    document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
+    document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+    document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
+}
+
+// تابع چاپ بارکد
+function printBarcode() {
+    const barcode = document.getElementById('barcode').value;
+    if (barcode) {
+        alert(`چاپ بارکد: ${barcode}`);
+        // اینجا می‌توانید کد چاپ بارکد را اضافه کنید.
+    } else {
+        alert('لطفاً ابتدا بارکد را وارد کنید.');
+    }
+}
+</script>
+
+<?php
+require_once '../../templates/footer.php';
+?>
+2. ایجاد فایل style.css
+برای استایل‌دهی بهتر، یک فایل style.css ایجاد می‌کنیم و آن را به پروژه اضافه می‌کنیم.
+
+آدرس فایل: /assets/css/style.css
+
+css
+Copy
+/* استایل کلی */
+body {
+    font-family: 'Vazir', sans-serif;
+    direction: rtl;
+}
+
+/* استایل تب‌ها */
+.tab-button {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+}
+
+.tab-button.active {
+    border-bottom-color: #3b82f6;
+    color: #3b82f6;
+}
+
+.tab-content {
+    display: none;
+    padding: 1rem 0;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* استایل هشدار حداقل سفارش */
+#min-order-warning {
+    display: none;
+}
+
+#min-order-warning.show {
+    display: block;
+}
+3. بروزرسانی فایل header.php برای اضافه کردن style.css
+فایل header.php را به‌روزرسانی می‌کنیم تا فایل style.css را لود کند.
+
+آدرس فایل: /templates/header.php
+
+php
+Copy
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>برنامه حسابداری فروشگاه</title>
+    <!-- لینک CDN Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- لینک فایل style.css -->
+    <link rel="stylesheet" href="<?php echo SITE_URL; ?>/assets/css/style.css">
+</head>
+<body class="bg-gray-100 text-gray-800">
+    <!-- بقیه کدها... -->
