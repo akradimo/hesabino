@@ -1,0 +1,75 @@
+/project
+    /assets
+        /css
+            style.css        // فایل CSS اصلی (اختیاری، اگر از CDN Tailwind استفاده می‌کنید)
+    /includes
+        config.php          // تنظیمات پایه‌ای برنامه (مثل اتصال به دیتابیس)
+        db.php              // کلاس و توابع مربوط به دیتابیس
+    /src
+        /products
+            products.php     // مدیریت محصولات
+            edit_product.php // ویرایش محصولات
+        /services
+            services.php    // مدیریت خدمات
+            edit_service.php // ویرایش خدمات
+        /sales
+            sales.php       // مدیریت فروش
+        /feedbacks
+            feedbacks.php   // مدیریت بازخوردها
+        /chat
+            chat.php        // سیستم چت
+            get_messages.php // دریافت پیام‌ها با Ajax
+        /events
+            events.php      // مدیریت رویدادها
+        /users
+            users.php       // مدیریت کاربران
+        /payment
+            payment.php     // صفحه پرداخت
+            payment_callback.php // بازگشت از درگاه پرداخت
+        /reports
+            advanced_reports.php // گزارش‌های پیشرفته
+    /templates
+        header.php          // هدر سایت (منوی ناوبری)
+        footer.php          // فوتر سایت
+    index.php              // صفحه اصلی
+
+    توضیحات هر بخش
+پوشه assets/css:
+
+اگر از CDN Tailwind استفاده نمی‌کنید، می‌توانید فایل‌های CSS سفارشی خود را در این پوشه قرار دهید.
+
+پوشه includes:
+
+config.php: تنظیمات پایه‌ای برنامه مانند اتصال به دیتابیس.
+
+db.php: کلاس و توابع مربوط به دیتابیس.
+
+پوشه src:
+
+products: مدیریت محصولات (افزودن، ویرایش، حذف و نمایش محصولات).
+
+services: مدیریت خدمات (افزودن، ویرایش، حذف و نمایش خدمات).
+
+sales: مدیریت فروش (ثبت فروش و نمایش فروش‌ها).
+
+feedbacks: مدیریت بازخوردهای مشتریان.
+
+chat: سیستم چت بین کاربران.
+
+events: مدیریت رویدادها (ثبت و نمایش رویدادها).
+
+users: مدیریت کاربران (افزودن، حذف و نمایش کاربران).
+
+payment: سیستم پرداخت و بازگشت از درگاه پرداخت.
+
+reports: گزارش‌های پیشرفته (فروش بر اساس کاربر، تخفیف و غیره).
+
+پوشه templates:
+
+header.php: هدر سایت شامل منوی ناوبری.
+
+footer.php: فوتر سایت.
+
+فایل index.php:
+
+صفحه اصلی برنامه.
