@@ -1,13 +1,23 @@
 <?php
-require_once '../includes/db.php';
-require_once '../templates/header.php';
+// شروع session
+session_start();
 
-// ارسال پیام
+// اطمینان از اینکه کاربر لاگین کرده است
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../../index.php"); // اگر کاربر لاگین نکرده باشد، به صفحه اصلی هدایت شود
+    exit();
+}
+
+// اتصال به دیتابیس
+require_once '../../includes/db.php'; // مسیر درست به فایل db.php
+
+// افزودن پیام جدید
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_message'])) {
-    $sender_id = $db->escape($_POST['sender_id']);
+    $sender_id = $_SESSION['user_id']; // فرستنده، کاربر فعلی است
     $receiver_id = $db->escape($_POST['receiver_id']);
     $message = $db->escape($_POST['message']);
 
+    // درج پیام در دیتابیس
     $sql = "INSERT INTO messages (sender_id, receiver_id, message) VALUES ('$sender_id', '$receiver_id', '$message')";
     if ($db->query($sql)) {
         echo "<p class='bg-green-100 text-green-800 p-2 rounded'>پیام با موفقیت ارسال شد.</p>";
@@ -17,9 +27,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_message'])) {
 }
 
 // دریافت پیام‌ها
-$user_id = $_SESSION['user_id']; // فرض می‌کنیم کاربر وارد سیستم شده است
-$sql = "SELECT * FROM messages WHERE (sender_id='$user_id' OR receiver_id='$user_id') ORDER BY created_at ASC";
+$user_id = $_SESSION['user_id'];
+$sql = "SELECT messages.*, users.username as sender_name 
+        FROM messages 
+        LEFT JOIN users ON messages.sender_id = users.id 
+        WHERE (sender_id='$user_id' OR receiver_id='$user_id') 
+        ORDER BY created_at ASC";
 $result = $db->query($sql);
+
+// اضافه کردن هدر
+require_once '../../templates/header.php'; // مسیر درست به فایل header.php
 ?>
 
 <div class="container mx-auto px-4 py-8">
@@ -52,7 +69,7 @@ $result = $db->query($sql);
     <div id="chat-messages" class="bg-white rounded-lg shadow-md p-6">
         <?php while ($row = $result->fetch_assoc()): ?>
         <div class="message mb-4">
-            <strong><?php echo $row['sender_id'] == $user_id ? 'شما' : 'کاربر دیگر'; ?>:</strong>
+            <strong><?php echo $row['sender_id'] == $user_id ? 'شما' : $row['sender_name']; ?>:</strong>
             <p class="text-gray-700"><?php echo $row['message']; ?></p>
             <small class="text-gray-500"><?php echo $row['created_at']; ?></small>
         </div>
@@ -72,5 +89,6 @@ setInterval(function() {
 </script>
 
 <?php
-require_once '../templates/footer.php';
+// اضافه کردن فوتر
+require_once '../../templates/footer.php'; // مسیر درست به فایل footer.php
 ?>

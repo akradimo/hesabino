@@ -16,9 +16,9 @@
                     <li><a href="<?php echo SITE_URL; ?>/index.php" class="hover:text-blue-200">خانه</a></li>
                     <li><a href="<?php echo SITE_URL; ?>/src/products.php" class="hover:text-blue-200">محصولات</a></li>
                     <li><a href="<?php echo SITE_URL; ?>/src/services.php" class="hover:text-blue-200">خدمات</a></li>
-                    <li><a href="<?php echo SITE_URL; ?>/src/sales.php" class="hover:text-blue-200">فروش</a></li>
+                    <li><a href="<?php echo SITE_URL; ?>/src/sales/sales.php" class="hover:text-blue-200">فروش</a></li>
                     <li><a href="<?php echo SITE_URL; ?>/src/feedbacks.php" class="hover:text-blue-200">بازخوردها</a></li>
-                    <li><a href="<?php echo SITE_URL; ?>/src/chat.php" class="hover:text-blue-200">چت</a></li>
+                    <li><a href="<?php echo SITE_URL; ?>/src/chat/chat.php" class="hover:text-blue-200">چت</a></li>
                     <li><a href="<?php echo SITE_URL; ?>/src/events.php" class="hover:text-blue-200">رویدادها</a></li>
                     <li><a href="<?php echo SITE_URL; ?>/src/users.php" class="hover:text-blue-200">کاربران</a></li>
                     <li><a href="<?php echo SITE_URL; ?>/src/payment.php" class="hover:text-blue-200">پرداخت</a></li>

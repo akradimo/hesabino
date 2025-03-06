@@ -18,6 +18,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_sale'])) {
         echo "<p class='bg-red-100 text-red-800 p-2 rounded'>خطا در ثبت فروش.</p>";
     }
 }
+// حذف فروش
+if (isset($_GET['delete_sale'])) {
+    $id = $db->escape($_GET['delete_sale']);
+    $sql = "DELETE FROM sales WHERE id='$id'";
+    if ($db->query($sql)) {
+        echo "<p class='bg-green-100 text-green-800 p-2 rounded'>فروش با موفقیت حذف شد.</p>";
+    } else {
+        echo "<p class='bg-red-100 text-red-800 p-2 rounded'>خطا در حذف فروش.</p>";
+    }
+}
 
 // نمایش فروش‌ها
 $sql = "SELECT sales.*, products.name as product_name, services.name as service_name, discounts.code as discount_code 
