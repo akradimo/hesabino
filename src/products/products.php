@@ -1,72 +1,73 @@
 <?php
+require_once '../../includes/config.php';
 require_once '../../includes/db.php';
-require_once '../../templates/header.php';
+require_once '../../includes/functions.php';
 
-$category_id = isset($_GET['category_id']) ? $db->escape($_GET['category_id']) : null;
-$search = isset($_GET['search']) ? $db->escape($_GET['search']) : '';
-
-$sql = "SELECT products.*, categories.name as category_name 
-        FROM products 
-        LEFT JOIN categories ON products.category_id = categories.id";
-        
-if ($category_id) {
-    $sql .= " WHERE category_id = '$category_id'";
-}
-if ($search) {
-    $sql .= $category_id ? " AND " : " WHERE ";
-    $sql .= "(products.name LIKE '%$search%' OR categories.name LIKE '%$search%')";
-}
-
-$result = $db->query($sql);
+// دریافت لیست محصولات از دیتابیس
+$stmt = $db->query("SELECT * FROM products WHERE deleted_at IS NULL ORDER BY id DESC");
+$products = $stmt->fetchAll();
 ?>
 
-<div class="container mx-auto px-4 py-8">
-    <h2 class="text-2xl font-bold mb-4">لیست محصولات</h2>
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت محصولات - حسابینو</title>
+    <link rel="stylesheet" href="<?= asset('css/styles.css') ?>">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold text-gray-800">مدیریت محصولات</h1>
+                <a href="add_product.php" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                    افزودن محصول جدید
+                </a>
+            </div>
 
-    <form method="GET" action="" class="mb-6">
-        <div class="flex items-center gap-4">
-            <input type="text" name="search" placeholder="جستجو..." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">جستجو</button>
+            <?php if(hasSuccess()): ?>
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                    <?= getSuccess() ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if(hasError()): ?>
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    <?= getError() ?>
+                </div>
+            <?php endif; ?>
+
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">کد محصول</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">نام محصول</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">قیمت</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">موجودی</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <?php foreach($products as $product): ?>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap"><?= $product['code'] ?? '-' ?></td>
+                                <td class="px-6 py-4 whitespace-nowrap"><?= clean($product['name']) ?></td>
+                                <td class="px-6 py-4 whitespace-nowrap"><?= formatPrice($product['price'] ?? 0) ?></td>
+                                <td class="px-6 py-4 whitespace-nowrap"><?= $product['stock'] ?? 0 ?></td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <a href="edit_product.php?id=<?= $product['id'] ?>" class="text-blue-600 hover:text-blue-900 ml-3">ویرایش</a>
+                                    <a href="delete_product.php?id=<?= $product['id'] ?>" 
+                                       class="text-red-600 hover:text-red-900" 
+                                       onclick="return confirm('آیا از حذف این محصول اطمینان دارید؟')">حذف</a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </form>
-
-    <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <table class="min-w-full">
-            <thead class="bg-blue-600 text-white">
-                <tr>
-                    <th class="px-6 py-3 text-right">تصویر</th>
-                    <th class="px-6 py-3 text-right">نام محصول</th>
-                    <th class="px-6 py-3 text-right">دسته‌بندی</th>
-                    <th class="px-6 py-3 text-right">قیمت</th>
-                    <th class="px-6 py-3 text-right">موجودی</th>
-                    <th class="px-6 py-3 text-right">عملیات</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-                <?php while ($row = $result->fetch_assoc()): ?>
-                <tr>
-                    <td class="px-6 py-4">
-                        <?php if ($row['image']): ?>
-                            <img src="../../assets/images/products/<?php echo $row['image']; ?>" alt="تصویر محصول" class="w-16 h-16 object-cover">
-                        <?php else: ?>
-                            <span>بدون تصویر</span>
-                        <?php endif; ?>
-                    </td>
-                    <td class="px-6 py-4"><?php echo $row['name']; ?></td>
-                    <td class="px-6 py-4"><?php echo $row['category_name']; ?></td>
-                    <td class="px-6 py-4"><?php echo $row['price']; ?></td>
-                    <td class="px-6 py-4"><?php echo $row['initial_stock']; ?></td>
-                    <td class="px-6 py-4">
-                        <a href="edit_product.php?id=<?php echo $row['id']; ?>" class="text-blue-600 hover:text-blue-800">ویرایش</a>
-                        <a href="?delete_product=<?php echo $row['id']; ?>" class="text-red-600 hover:text-red-800" onclick="return confirm('آیا مطمئن هستید؟')">حذف</a>
-                    </td>
-                </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
     </div>
-</div>
-
-<?php
-require_once '../../templates/footer.php';
-?>
+</body>
+</html>

@@ -1,53 +1,62 @@
 <?php
-require_once 'config.php';
-
 class Database {
-    private $conn;
+    private $connection;
+    private static $instance = null;
 
-    public function __construct() {
-        $this->conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-
-        if ($this->conn->connect_error) {
-            die("Connection failed: " . $this->conn->connect_error);
-        }
-        $this->conn->set_charset("utf8mb4");
-    }
-
-    public function getConnection() {
-        return $this->conn;
-    }
-
-    public function query($sql) {
-        return $this->conn->query($sql);
-    }
-
-    public function escape($value) {
-        return $this->conn->real_escape_string($value);
-    }
-
-    public function close() {
-        $this->conn->close();
-    }
-
-    public function deleteCategory($id) {
-        $this->conn->begin_transaction();
+    private function __construct() {
         try {
-            // حذف تمام زیرمجموعه‌های دسته‌بندی
-            $sql = "DELETE FROM categories WHERE path LIKE (SELECT CONCAT(path, '/%') FROM (SELECT path FROM categories WHERE id = '$id') AS temp)";
-            $this->query($sql);
-
-            // حذف خود دسته‌بندی
-            $sql = "DELETE FROM categories WHERE id = '$id'";
-            $this->query($sql);
-
-            $this->conn->commit();
-            return true;
-        } catch (mysqli_sql_exception $exception) {
-            $this->conn->rollback();
-            throw $exception;
+            $this->connection = new PDO(
+                "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+                DB_USER,
+                DB_PASS,
+                [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
+                ]
+            );
+        } catch(PDOException $e) {
+            die('خطا در اتصال به پایگاه داده: ' . $e->getMessage());
         }
+    }
+
+    public static function getInstance() {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    public function query($query, $params = []) {
+        try {
+            $stmt = $this->connection->prepare($query);
+            $stmt->execute($params);
+            return $stmt;
+        } catch(PDOException $e) {
+            die('خطا در اجرای کوئری: ' . $e->getMessage());
+        }
+    }
+
+    public function getAll($query, $params = []) {
+        return $this->query($query, $params)->fetchAll();
+    }
+
+    public function getOne($query, $params = []) {
+        return $this->query($query, $params)->fetch();
+    }
+
+    public function insert($query, $params = []) {
+        $this->query($query, $params);
+        return $this->connection->lastInsertId();
+    }
+
+    public function update($query, $params = []) {
+        return $this->query($query, $params)->rowCount();
+    }
+
+    public function delete($query, $params = []) {
+        return $this->query($query, $params)->rowCount();
     }
 }
 
-$db = new Database();
-?>
+$db = Database::getInstance();

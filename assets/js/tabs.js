@@ -1,5 +1,4 @@
-// مدیریت تب‌ها و رویدادها
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
     // متغیرهای سراسری
     const تب_ها = {
         دکمه_ها: document.querySelectorAll('.tab-button'),
@@ -14,17 +13,11 @@ document.addEventListener('DOMContentLoaded', function() {
         دکمه.addEventListener('click', () => تغییر_تب(دکمه));
     });
 
-    // تولید بارکد خودکار
-    const دکمه_بارکد = document.querySelector('[data-action="generate-barcode"]');
-    if (دکمه_بارکد) {
-        دکمه_بارکد.addEventListener('click', تولید_بارکد_خودکار);
-    }
-
-    // رویدادهای محاسبه مالیات
-    ['sale_price', 'sales_tax_rate', 'sales_tax_included'].forEach(فیلد => {
+    // رویدادهای محاسبه قیمت و مالیات
+    ['قیمت_فروش', 'درصد_مالیات', 'شامل_مالیات'].forEach(فیلد => {
         const المان = document.getElementById(فیلد);
         if (المان) {
-            المان.addEventListener('change', محاسبه_مالیات);
+            المان.addEventListener('change', محاسبه_قیمت_نهایی);
         }
     });
 });
@@ -54,33 +47,22 @@ function تغییر_تب(دکمه_فعال) {
     document.getElementById(شناسه_تب + '-tab')?.classList.remove('hidden');
 }
 
-function تولید_بارکد_خودکار() {
-    const پیشوند = '200';
-    const بخش_تصادفی = Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
-    document.getElementById('barcode').value = پیشوند + بخش_تصادفی;
-}
-
-function محاسبه_مالیات() {
-    const قیمت = parseFloat(document.getElementById('sale_price').value) || 0;
-    const نرخ_مالیات = parseFloat(document.getElementById('sales_tax_rate').value) || 0;
-    const شامل_مالیات = document.getElementById('sales_tax_included').checked;
+function محاسبه_قیمت_نهایی() {
+    const قیمت = parseFloat(تبدیل_به_انگلیسی(document.getElementById('قیمت_فروش').value)) || 0;
+    const درصد_مالیات = parseFloat(تبدیل_به_انگلیسی(document.getElementById('درصد_مالیات').value)) || 0;
+    const شامل_مالیات = document.getElementById('شامل_مالیات').checked;
 
     let مبلغ_مالیات = 0;
     let قیمت_نهایی = 0;
 
     if (شامل_مالیات) {
-        مبلغ_مالیات = (قیمت * نرخ_مالیات) / (100 + نرخ_مالیات);
+        مبلغ_مالیات = (قیمت * درصد_مالیات) / (100 + درصد_مالیات);
         قیمت_نهایی = قیمت;
     } else {
-        مبلغ_مالیات = (قیمت * نرخ_مالیات) / 100;
+        مبلغ_مالیات = (قیمت * درصد_مالیات) / 100;
         قیمت_نهایی = قیمت + مبلغ_مالیات;
     }
 
-    // نمایش نتایج با فرمت فارسی
-    if (document.getElementById('tax_amount')) {
-        document.getElementById('tax_amount').value = new Intl.NumberFormat('fa-IR').format(Math.round(مبلغ_مالیات));
-    }
-    if (document.getElementById('final_price')) {
-        document.getElementById('final_price').value = new Intl.NumberFormat('fa-IR').format(Math.round(قیمت_نهایی));
-    }
+    document.getElementById('مبلغ_مالیات').value = فرمت_پول(Math.round(مبلغ_مالیات));
+    document.getElementById('قیمت_نهایی').value = فرمت_پول(Math.round(قیمت_نهایی));
 }
