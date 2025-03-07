@@ -2,15 +2,33 @@
 require_once '../../includes/db.php';
 require_once '../../templates/header.php';
 
-// نمایش محصولات
+$category_id = isset($_GET['category_id']) ? $db->escape($_GET['category_id']) : null;
+$search = isset($_GET['search']) ? $db->escape($_GET['search']) : '';
+
 $sql = "SELECT products.*, categories.name as category_name 
         FROM products 
         LEFT JOIN categories ON products.category_id = categories.id";
+        
+if ($category_id) {
+    $sql .= " WHERE category_id = '$category_id'";
+}
+if ($search) {
+    $sql .= $category_id ? " AND " : " WHERE ";
+    $sql .= "(products.name LIKE '%$search%' OR categories.name LIKE '%$search%')";
+}
+
 $result = $db->query($sql);
 ?>
 
 <div class="container mx-auto px-4 py-8">
     <h2 class="text-2xl font-bold mb-4">لیست محصولات</h2>
+
+    <form method="GET" action="" class="mb-6">
+        <div class="flex items-center gap-4">
+            <input type="text" name="search" placeholder="جستجو..." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">جستجو</button>
+        </div>
+    </form>
 
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
         <table class="min-w-full">
