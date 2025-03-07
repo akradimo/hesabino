@@ -18,15 +18,16 @@ define('DB_NAME', 'hesabino');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 
-// کاربر فعلی
+// تنظیمات کاربر و زمان
 define('CURRENT_USER', 'akradimo');
-define('CURRENT_TIME', '2025-03-07 06:15:50');
+define('CURRENT_TIME', '1403-12-17 10:01:40');
 
-// لود کردن فایل‌های اصلی
-require_once BASE_PATH . '/includes/functions.php';
-require_once BASE_PATH . '/includes/db.php';
+// لود کردن فایل‌های اصلی به ترتیب
+require_once BASE_PATH . '/includes/jdf.php';      // تابع‌های تاریخ شمسی
+require_once BASE_PATH . '/includes/functions.php'; // توابع عمومی
+require_once BASE_PATH . '/includes/db.php';        // کلاس دیتابیس
 
-// تابع مسیر‌دهی
+// تابع‌های مسیردهی
 function url($path = '') {
     return SITE_URL . '/' . ltrim($path, '/');
 }
@@ -35,6 +36,32 @@ function asset($path = '') {
     return ASSETS_URL . '/' . ltrim($path, '/');
 }
 
-// تنظیم متغیرهای پایه
+// تبدیل تاریخ میلادی به شمسی
+function toJalali($date) {
+    if (!$date) return '';
+    $timestamp = strtotime($date);
+    list($year, $month, $day) = explode('-', date('Y-m-d', $timestamp));
+    return gregorian_to_jalali($year, $month, $day, '/');
+}
+
+// تبدیل تاریخ شمسی به میلادی
+function toGregorian($date) {
+    if (!$date) return '';
+    list($year, $month, $day) = explode('/', $date);
+    return implode('-', jalali_to_gregorian($year, $month, $day));
+}
+
+// فرمت‌بندی قیمت
+function formatPrice($price) {
+    return number_format($price, 0, '.', ',') . ' تومان';
+}
+
+// فرمت‌بندی تاریخ
+function formatDate($date) {
+    return $date ? toJalali($date) : '';
+}
+
+// تنظیم متغیرهای پایه برای همه صفحات
 $current_page = '';
 $page_title = 'حسابینو';
+$page_description = 'سامانه حسابداری آنلاین';

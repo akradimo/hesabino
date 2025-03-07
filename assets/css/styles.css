@@ -120,3 +120,49 @@ body {
     padding: 0.75rem 1rem;
     border-bottom: 1px solid #e5e7eb;
 }
+
+/* منوی کشویی */
+.menu-group {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.menu-toggle {
+    cursor: pointer;
+}
+
+.menu-toggle .fa-chevron-down {
+    transition: transform 0.2s ease-in-out;
+}
+
+.menu-toggle.active .fa-chevron-down {
+    transform: rotate(-180deg);
+}
+
+.submenu {
+    display: none;
+    background-color: #f8fafc;
+    padding-right: 2rem;
+}
+
+.menu-toggle.active + .submenu {
+    display: block;
+}
+
+.submenu-item {
+    display: block;
+    padding: 0.5rem 1rem;
+    color: #4b5563;
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.submenu-item:hover {
+    color: #2563eb;
+    background-color: #f1f5f9;
+}
+
+.submenu-item.active {
+    color: #2563eb;
+    background-color: #e5edff;
+}

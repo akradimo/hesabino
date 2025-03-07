@@ -1,61 +1,113 @@
--- ایجاد جدول محصولات
-CREATE TABLE IF NOT EXISTS products (
+-- ایجاد جدول تنظیمات سیستم
+CREATE TABLE settings (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    code VARCHAR(50) DEFAULT NULL,
-    name VARCHAR(255) NOT NULL,
-    price DECIMAL(10,0) DEFAULT 0,
-    stock INT DEFAULT 0,
+    company_name VARCHAR(255),
+    company_logo VARCHAR(255),
+    company_header TEXT,
+    sms_username VARCHAR(100),
+    sms_password VARCHAR(100),
+    sms_sender VARCHAR(20),
+    email_host VARCHAR(255),
+    email_username VARCHAR(255),
+    email_password VARCHAR(255),
+    email_from VARCHAR(255),
+    print_template TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP,
+    updated_by INT,
+    FOREIGN KEY (updated_by) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;
+
+-- ایجاد جدول سال‌های مالی
+CREATE TABLE fiscal_years (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(100) NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    is_active TINYINT(1) DEFAULT 0,
+    is_closed TINYINT(1) DEFAULT 0,
     description TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at DATETIME DEFAULT NULL
+    created_by INT,
+    closed_at DATETIME,
+    closed_by INT,
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (closed_by) REFERENCES users(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;
 
--- ایجاد جدول مشتریان
-CREATE TABLE IF NOT EXISTS customers (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL,
-    mobile VARCHAR(11) DEFAULT NULL,
-    email VARCHAR(255) DEFAULT NULL,
-    address TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at DATETIME DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;
+-- بروزرسانی جدول users
+ALTER TABLE users 
+ADD COLUMN expire_date DATE,
+ADD COLUMN signature_image VARCHAR(255),
+ADD COLUMN last_login DATETIME,
+ADD COLUMN failed_attempts INT DEFAULT 0,
+ADD COLUMN locked_until DATETIME,
+ADD COLUMN force_change_password TINYINT(1) DEFAULT 0,
+ADD COLUMN password_changed_at DATETIME,
+ADD COLUMN created_by INT,
+ADD COLUMN updated_by INT,
+ADD FOREIGN KEY (created_by) REFERENCES users(id),
+ADD FOREIGN KEY (updated_by) REFERENCES users(id);
 
--- ایجاد جدول فاکتورها
-CREATE TABLE IF NOT EXISTS invoices (
+-- ایجاد جدول نقش‌ها
+CREATE TABLE roles (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    invoice_number VARCHAR(20) NOT NULL,
-    customer_id INT NOT NULL,
-    total_amount DECIMAL(10,0) DEFAULT 0,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    display_name VARCHAR(100),
     description TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at DATETIME DEFAULT NULL,
-    FOREIGN KEY (customer_id) REFERENCES customers(id)
+    updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP,
+    created_by INT,
+    updated_by INT,
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (updated_by) REFERENCES users(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;
 
--- ایجاد جدول اقلام فاکتور
-CREATE TABLE IF NOT EXISTS invoice_items (
+-- ایجاد جدول مجوزها
+CREATE TABLE permissions (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    invoice_id INT NOT NULL,
-    product_id INT NOT NULL,
-    quantity INT DEFAULT 1,
-    price DECIMAL(10,0) DEFAULT 0,
-    total_price DECIMAL(10,0) DEFAULT 0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (invoice_id) REFERENCES invoices(id),
-    FOREIGN KEY (product_id) REFERENCES products(id)
+    name VARCHAR(100) NOT NULL UNIQUE,
+    display_name VARCHAR(100),
+    description TEXT,
+    group_name VARCHAR(50),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;
 
--- اضافه کردن داده‌های نمونه به جدول مشتریان
-INSERT INTO customers (name, mobile, email, address) VALUES
-('علی محمدی', '09123456789', 'ali@example.com', 'تهران، خیابان ولیعصر'),
-('مریم احمدی', '09198765432', 'maryam@example.com', 'اصفهان، خیابان چهارباغ');
+-- ایجاد جدول رابط نقش‌ها و مجوزها
+CREATE TABLE role_permissions (
+    role_id INT,
+    permission_id INT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by INT,
+    PRIMARY KEY (role_id, permission_id),
+    FOREIGN KEY (role_id) REFERENCES roles(id),
+    FOREIGN KEY (permission_id) REFERENCES permissions(id),
+    FOREIGN KEY (created_by) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;
 
--- اضافه کردن داده‌های نمونه به جدول محصولات
-INSERT INTO products (code, name, price, stock) VALUES
-('P001', 'لپ تاپ ایسوس', 25000000, 5),
-('P002', 'موس گیمینگ', 850000, 10),
-('P003', 'کیبورد مکانیکال', 1200000, 8);
+-- ایجاد جدول رابط کاربران و نقش‌ها
+CREATE TABLE user_roles (
+    user_id INT,
+    role_id INT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by INT,
+    PRIMARY KEY (user_id, role_id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (role_id) REFERENCES roles(id),
+    FOREIGN KEY (created_by) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;
+
+-- درج مجوزهای پیش‌فرض
+INSERT INTO permissions (name, display_name, group_name) VALUES
+('users.view', 'مشاهده کاربران', 'مدیریت کاربران'),
+('users.create', 'ایجاد کاربر', 'مدیریت کاربران'),
+('users.edit', 'ویرایش کاربر', 'مدیریت کاربران'),
+('users.delete', 'حذف کاربر', 'مدیریت کاربران'),
+('roles.view', 'مشاهده نقش‌ها', 'مدیریت نقش‌ها'),
+('roles.create', 'ایجاد نقش', 'مدیریت نقش‌ها'),
+('roles.edit', 'ویرایش نقش', 'مدیریت نقش‌ها'),
+('roles.delete', 'حذف نقش', 'مدیریت نقش‌ها');
+
+-- درج نقش مدیر سیستم
+INSERT INTO roles (name, display_name, description) VALUES
+('admin', 'مدیر سیستم', 'دسترسی کامل به تمام بخش‌های سیستم');

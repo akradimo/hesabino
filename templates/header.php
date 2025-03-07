@@ -28,10 +28,55 @@
                 <i class="fas fa-home ml-2"></i>
                 داشبورد
             </a>
-            <a href="<?= url('src/products/products.php') ?>" class="menu-item <?= $current_page === 'products' ? 'active' : '' ?>">
-                <i class="fas fa-box ml-2"></i>
-                محصولات
-            </a>
+
+            <!-- منوی کالا و خدمات -->
+            <div class="menu-group">
+                <div class="menu-item menu-toggle <?= str_starts_with($current_page, 'products') ? 'active' : '' ?>">
+                    <div class="flex justify-between items-center w-full">
+                        <div>
+                            <i class="fas fa-box ml-2"></i>
+                            کالا و خدمات
+                        </div>
+                        <i class="fas fa-chevron-down text-sm transition-transform"></i>
+                    </div>
+                </div>
+                <div class="submenu">
+                    <a href="<?= url('src/products/add_product.php?type=product') ?>" class="submenu-item">
+                        <i class="fas fa-plus ml-2"></i>
+                        کالای جدید
+                    </a>
+                    <a href="<?= url('src/products/add_product.php?type=service') ?>" class="submenu-item">
+                        <i class="fas fa-plus ml-2"></i>
+                        خدمات جدید
+                    </a>
+                    <a href="<?= url('src/products/products.php?type=product') ?>" class="submenu-item">
+                        <i class="fas fa-list ml-2"></i>
+                        فهرست کالاها
+                    </a>
+                    <a href="<?= url('src/products/products.php?type=service') ?>" class="submenu-item">
+                        <i class="fas fa-list ml-2"></i>
+                        فهرست خدمات
+                    </a>
+                    <a href="<?= url('src/products/price_list.php') ?>" class="submenu-item">
+                        <i class="fas fa-tags ml-2"></i>
+                        به‌روزرسانی لیست قیمت
+                    </a>
+                    <a href="<?= url('src/products/barcode.php') ?>" class="submenu-item">
+                        <i class="fas fa-barcode ml-2"></i>
+                        چاپ بارکد
+                    </a>
+                    <a href="<?= url('src/products/barcode_bulk.php') ?>" class="submenu-item">
+                        <i class="fas fa-print ml-2"></i>
+                        چاپ بارکد تعدادی
+                    </a>
+                    <a href="<?= url('src/products/price_lists.php') ?>" class="submenu-item">
+                        <i class="fas fa-file-alt ml-2"></i>
+                        لیست قیمت‌ها
+                    </a>
+                </div>
+            </div>
+
+            <!-- بقیه منوها -->
             <a href="<?= url('src/customers/customers.php') ?>" class="menu-item <?= $current_page === 'customers' ? 'active' : '' ?>">
                 <i class="fas fa-users ml-2"></i>
                 مشتریان
