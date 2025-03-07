@@ -17,23 +17,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
     $reorder_point = $db->escape($_POST['reorder_point']);
     $min_order = $db->escape($_POST['min_order']);
     $lead_time = $db->escape($_POST['lead_time']);
-
-    // آپلود تصویر
-    if ($_FILES['image']['error'] === UPLOAD_ERR_OK) {
+    
+    // مدیریت آپلود تصویر
+    $image_name = null;
+    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+        $upload_dir = '../../assets/images/products/';
+        if (!file_exists($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
+        
         $image_name = uniqid() . '_' . basename($_FILES['image']['name']);
-        $image_path = '../../assets/images/products/' . $image_name;
-        move_uploaded_file($_FILES['image']['tmp_name'], $image_path);
-    } else {
-        $image_name = null;
+        $image_path = $upload_dir . $image_name;
+        
+        if (move_uploaded_file($_FILES['image']['tmp_name'], $image_path)) {
+            // آپلود موفق
+        } else {
+            echo "<p class='bg-red-100 text-red-800 p-2 rounded'>خطا در آپلود تصویر</p>";
+        }
     }
 
     // ذخیره محصول در دیتابیس
-    $sql = "INSERT INTO products (name, barcode, category_id, sale_price, sale_description, purchase_price, purchase_description, unit, general_description, control_stock, reorder_point, min_order, lead_time, image)
-            VALUES ('$name', '$barcode', '$category_id', '$sale_price', '$sale_description', '$purchase_price', '$purchase_description', '$unit', '$general_description', '$control_stock', '$reorder_point', '$min_order', '$lead_time', '$image_name')";
+    $sql = "INSERT INTO products (name, barcode, category_id, sale_price, sale_description, 
+            purchase_price, purchase_description, unit, general_description, control_stock, 
+            reorder_point, min_order, lead_time, image) 
+            VALUES ('$name', '$barcode', '$category_id', '$sale_price', '$sale_description', 
+            '$purchase_price', '$purchase_description', '$unit', '$general_description', 
+            $control_stock, '$reorder_point', '$min_order', '$lead_time', " . 
+            ($image_name ? "'$image_name'" : "NULL") . ")";
+
     if ($db->query($sql)) {
         echo "<p class='bg-green-100 text-green-800 p-2 rounded'>محصول با موفقیت افزوده شد.</p>";
     } else {
-        echo "<p class='bg-red-100 text-red-800 p-2 rounded'>خطا در افزودن محصول.</p>";
+        echo "<p class='bg-red-100 text-red-800 p-2 rounded'>خطا در افزودن محصول: " . $db->getConnection()->error . "</p>";
     }
 }
 
@@ -46,29 +61,10 @@ $categories = $db->query("SELECT * FROM categories");
 
     <form method="POST" action="" enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow-md">
         <!-- تصویر محصول -->
-        <div class="col col-md-auto text-center" id="image" style="width: 280px;">
-            <div class="image mt-3 mt-md-5">
-                <img alt="product image" src="https://coredemo.hesabfa.com/api/bdata/other/product.jpg">
-            </div>
-            <br>
-            <app-file-upload accept="image/*" stylingmode="text" type="default">
-                <dx-button class="container dx-button dx-button-default dx-button-mode-text dx-widget dx-rtl" tabindex="0" role="button" style="width: 80px;">
-                    <div class="dx-button-content">
-                        <span class="dx-button-text">انتخاب</span>
-                        <input class="file-upload" type="file" accept="image/*">
-                    </div>
-                </dx-button>
-            </app-file-upload>
-            <dx-button stylingmode="text" type="default" class="dx-button dx-button-default dx-button-mode-text dx-widget dx-state-invisible dx-rtl dx-button-has-text" aria-label="دوربین" aria-hidden="true" tabindex="0" role="button" style="width: 100px;">
-                <div class="dx-button-content">
-                    <span class="dx-button-text">دوربین</span>
-                </div>
-            </dx-button>
-            <dx-button stylingmode="text" type="danger" class="dx-button dx-button-danger dx-button-mode-text dx-widget dx-rtl dx-button-has-text" aria-label="حذف" tabindex="0" role="button" style="width: 80px;">
-                <div class="dx-button-content">
-                    <span class="dx-button-text">حذف</span>
-                </div>
-            </dx-button>
+        <div class="mb-6">
+            <label for="image" class="block text-sm font-medium text-gray-700">تصویر محصول:</label>
+            <input type="file" id="image" name="image" accept="image/*" class="mt-1 block w-full">
+            <p class="text-sm text-gray-500">فرمت‌های مجاز: JPG، PNG، GIF</p>
         </div>
 
         <!-- نام محصول -->
@@ -99,12 +95,12 @@ $categories = $db->query("SELECT * FROM categories");
 
         <!-- تب‌ها -->
         <div class="mb-6">
-        <div class="flex space-x-4 border-b border-gray-200 tab-container">
-            <button type="button" data-tab="sales" class="tab-button active">فروش</button>
-            <button type="button" data-tab="general" class="tab-button">عمومی</button>
-            <button type="button" data-tab="inventory" class="tab-button">موجودی کالا</button>
-            <button type="button" data-tab="tax" class="tab-button">مالیات</button>
-        </div>
+            <div class="flex space-x-4 border-b border-gray-200 tab-container">
+                <button type="button" data-tab="sales" class="tab-button active">فروش</button>
+                <button type="button" data-tab="general" class="tab-button">عمومی</button>
+                <button type="button" data-tab="inventory" class="tab-button">موجودی کالا</button>
+                <button type="button" data-tab="tax" class="tab-button">مالیات</button>
+            </div>
 
             <!-- محتوای تب فروش -->
             <div id="sales-tab" class="tab-content">
