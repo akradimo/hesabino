@@ -2,7 +2,9 @@
 require_once '../../includes/db.php';
 require_once '../../templates/header.php';
 
+// بررسی درخواست POST برای افزودن محصول جدید
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
+    // تعریف فیلدهای مجاز برای پردازش
     $fields = [
         'product_code',
         'product_type',
@@ -22,199 +24,371 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
         'purchase_tax_rate',
         'sale_price',
         'sale_description',
-        'purchase_price'
+        'purchase_price',
+        'purchase_description'
     ];
 
+    // آماده‌سازی داده‌ها برای ذخیره
     $data = [];
     foreach ($fields as $field) {
-        if ($field == 'stock_control' || $field == 'sales_tax_included' || $field == 'purchase_tax_included') {
+        // پردازش فیلدهای چک‌باکس
+        if (in_array($field, ['stock_control', 'sales_tax_included', 'purchase_tax_included'])) {
             $data[$field] = isset($_POST[$field]) ? 1 : 0;
-        } else {
+        }
+        // پردازش فیلدهای عددی
+        elseif (in_array($field, ['sale_price', 'purchase_price', 'sales_tax_rate', 'purchase_tax_rate', 'conversion_factor'])) {
+            $data[$field] = !empty($_POST[$field]) ? floatval($_POST[$field]) : 0;
+        }
+        // پردازش فیلدهای عددی صحیح
+        elseif (in_array($field, ['reorder_point', 'lead_time', 'min_order'])) {
+            $data[$field] = !empty($_POST[$field]) ? intval($_POST[$field]) : 0;
+        }
+        // پردازش سایر فیلدها
+        else {
             $data[$field] = $db->escape($_POST[$field] ?? '');
         }
     }
 
-    // آپلود تصویر
+    // پردازش و آپلود تصویر
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
         $upload_dir = '../../assets/images/products/';
+        // ایجاد پوشه در صورت عدم وجود
         if (!file_exists($upload_dir)) {
             mkdir($upload_dir, 0777, true);
         }
         
-        $image_name = uniqid() . '_' . basename($_FILES['image']['name']);
-        $image_path = $upload_dir . $image_name;
+        // تولید نام یکتا برای تصویر
+        $file_info = pathinfo($_FILES['image']['name']);
+        $extension = strtolower($file_info['extension']);
+        $allowed_types = ['jpg', 'jpeg', 'png', 'gif'];
         
-        if (move_uploaded_file($_FILES['image']['tmp_name'], $image_path)) {
-            $data['image'] = $image_name;
+        if (in_array($extension, $allowed_types)) {
+            $image_name = uniqid('product_') . '.' . $extension;
+            $image_path = $upload_dir . $image_name;
+            
+            if (move_uploaded_file($_FILES['image']['tmp_name'], $image_path)) {
+                $data['image'] = $image_name;
+            }
         }
     }
 
-    // ساخت کوئری INSERT
+    // اضافه کردن تاریخ ایجاد و بروزرسانی
+    $data['created_at'] = date('Y-m-d H:i:s');
+    $data['updated_at'] = date('Y-m-d H:i:s');
+
+    // ساخت و اجرای کوئری SQL
     $columns = implode(', ', array_keys($data));
-    $values = "'" . implode("', '", $data) . "'";
+    $values = "'" . implode("', '", array_values($data)) . "'";
     $sql = "INSERT INTO products ($columns) VALUES ($values)";
 
+    // اجرای کوئری و نمایش نتیجه
     if ($db->query($sql)) {
-        echo "<div class='bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4' role='alert'>
-                <strong class='font-bold'>موفق!</strong>
-                <span class='block sm:inline'> محصول با موفقیت اضافه شد.</span>
-              </div>";
+        $message = [
+            'type' => 'success',
+            'text' => 'محصول جدید با موفقیت اضافه شد.'
+        ];
     } else {
-        echo "<div class='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4' role='alert'>
-                <strong class='font-bold'>خطا!</strong>
-                <span class='block sm:inline'> خطا در افزودن محصول: " . $db->getConnection()->error . "</span>
-              </div>";
+        $message = [
+            'type' => 'error',
+            'text' => 'خطا در افزودن محصول: ' . $db->getConnection()->error
+        ];
     }
 }
 
-$categories = $db->query("SELECT * FROM categories");
+// دریافت لیست دسته‌بندی‌ها
+$categories = $db->query("SELECT * FROM categories ORDER BY name ASC");
 ?>
 
 <div class="container mx-auto px-4 py-8">
-    <h2 class="text-2xl font-bold mb-4">افزودن محصول جدید</h2>
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold">افزودن محصول جدید</h2>
+        <a href="index.php" class="btn btn-secondary">
+            بازگشت به لیست محصولات
+        </a>
+    </div>
 
-    <form method="POST" action="" enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow-md">
-        <!-- اطلاعات اصلی -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-                <label for="product_code" class="block text-sm font-medium text-gray-700">کد محصول:</label>
-                <input type="text" id="product_code" name="product_code" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-            </div>
-            
-            <div>
-                <label for="product_type" class="block text-sm font-medium text-gray-700">نوع کالا:</label>
-                <select id="product_type" name="product_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                    <option value="کالا">کالا</option>
-                    <option value="خدمات">خدمات</option>
-                </select>
+    <?php if (isset($message)): ?>
+        <div class="alert alert-<?php echo $message['type']; ?>">
+            <?php echo $message['text']; ?>
+        </div>
+    <?php endif; ?>
+
+    <form method="POST" action="" enctype="multipart/form-data" class="card" onsubmit="return validateProductForm()">
+        <div id="form-errors" class="mb-4"></div>
+
+        <!-- منوی تب‌ها -->
+        <div class="tabs-container mb-6">
+            <div class="flex border-b border-gray-200">
+                <button type="button" data-tab="general" class="tab-button active">
+                    <span class="ml-2">اطلاعات کلی</span>
+                </button>
+                <button type="button" data-tab="units" class="tab-button">
+                    <span class="ml-2">واحدها</span>
+                </button>
+                <button type="button" data-tab="inventory" class="tab-button">
+                    <span class="ml-2">موجودی</span>
+                </button>
+                <button type="button" data-tab="pricing" class="tab-button">
+                    <span class="ml-2">قیمت‌گذاری</span>
+                </button>
+                <button type="button" data-tab="tax" class="tab-button">
+                    <span class="ml-2">مالیات</span>
+                </button>
             </div>
 
-            <div>
-                <label for="name" class="block text-sm font-medium text-gray-700">نام محصول:</label>
-                <input type="text" id="name" name="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
-            </div>
+            <!-- محتوای تب‌ها -->
+            <div class="tab-contents mt-6">
+                <!-- تب اطلاعات کلی -->
+                <div id="general-tab" class="tab-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="product_code" class="form-label">کد محصول</label>
+                            <input type="text" id="product_code" name="product_code" class="form-input" required>
+                        </div>
+                        
+                        <div>
+                            <label for="product_type" class="form-label">نوع محصول</label>
+                            <select id="product_type" name="product_type" class="form-select">
+                                <option value="کالا">کالا</option>
+                                <option value="خدمات">خدمات</option>
+                            </select>
+                        </div>
 
-            <div>
-                <label for="barcode" class="block text-sm font-medium text-gray-700">بارکد:</label>
-                <div class="flex gap-2">
-                    <input type="text" id="barcode" name="barcode" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                    <button type="button" onclick="generateBarcode()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">تولید خودکار</button>
+                        <div>
+                            <label for="name" class="form-label">نام محصول</label>
+                            <input type="text" id="name" name="name" class="form-input" required>
+                        </div>
+
+                        <div>
+                            <label for="barcode" class="form-label">بارکد</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="barcode" name="barcode" class="form-input">
+                                <button type="button" class="btn btn-secondary" data-action="generate-barcode">
+                                    تولید خودکار
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label for="description" class="form-label">توضیحات</label>
+                            <textarea id="description" name="description" rows="4" class="form-input"></textarea>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label for="image" class="form-label">تصویر محصول</label>
+                            <input type="file" id="image" name="image" accept="image/*" class="form-input">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- تب واحدها -->
+                <div id="units-tab" class="tab-content hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label for="main_unit" class="form-label">واحد اصلی</label>
+                            <select id="main_unit" name="main_unit" class="form-select" required>
+                                <option value="">انتخاب کنید</option>
+                                <option value="عدد">عدد</option>
+                                <option value="کیلوگرم">کیلوگرم</option>
+                                <option value="متر">متر</option>
+                                <option value="لیتر">لیتر</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="sub_unit" class="form-label">واحد فرعی</label>
+                            <select id="sub_unit" name="sub_unit" class="form-select">
+                                <option value="">بدون واحد فرعی</option>
+                                <option value="عدد">عدد</option>
+                                <option value="کیلوگرم">کیلوگرم</option>
+                                <option value="متر">متر</option>
+                                <option value="لیتر">لیتر</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="conversion_factor" class="form-label">ضریب تبدیل</label>
+                            <input type="number" id="conversion_factor" name="conversion_factor" 
+                                   class="form-input" step="0.01" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- تب موجودی -->
+                <div id="inventory-tab" class="tab-content hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" id="stock_control" name="stock_control" class="form-checkbox">
+                                <span class="mr-2">کنترل موجودی</span>
+                            </label>
+                        </div>
+
+                        <div>
+                            <label for="reorder_point" class="form-label">نقطه سفارش</label>
+                            <input type="number" id="reorder_point" name="reorder_point" class="form-input" min="0">
+                        </div>
+
+                        <div>
+                            <label for="lead_time" class="form-label">زمان انتظار (روز)</label>
+                            <input type="number" id="lead_time" name="lead_time" class="form-input" min="0">
+                        </div>
+
+                        <div>
+                            <label for="min_order" class="form-label">حداقل سفارش</label>
+                            <input type="number" id="min_order" name="min_order" class="form-input" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- تب قیمت‌گذاری -->
+                <div id="pricing-tab" class="tab-content hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="sale_price" class="form-label">قیمت فروش</label>
+                            <input type="number" id="sale_price" name="sale_price" class="form-input" min="0">
+                        </div>
+
+                        <div>
+                            <label for="purchase_price" class="form-label">قیمت خرید</label>
+                            <input type="number" id="purchase_price" name="purchase_price" class="form-input" min="0">
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label for="sale_description" class="form-label">توضیحات فروش</label>
+                            <textarea id="sale_description" name="sale_description" rows="3" class="form-input"></textarea>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label for="purchase_description" class="form-label">توضیحات خرید</label>
+                            <textarea id="purchase_description" name="purchase_description" rows="3" class="form-input"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- تب مالیات -->
+                <div id="tax-tab" class="tab-content hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="form-label">مالیات فروش</label>
+                            <div class="space-y-2">
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" id="sales_tax_included" name="sales_tax_included" class="form-checkbox">
+                                    <span class="mr-2">مشمول مالیات فروش</span>
+                                </label>
+                                <div>
+                                    <label for="sales_tax_rate" class="form-label">درصد مالیات فروش</label>
+                                    <input type="number" id="sales_tax_rate" name="sales_tax_rate" 
+                                           class="form-input" step="0.01" min="0" max="100">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="form-label">مالیات خرید</label>
+                            <div class="space-y-2">
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" id="purchase_tax_included" name="purchase_tax_included" class="form-checkbox">
+                                    <span class="mr-2">مشمول مالیات خرید</span>
+                                </label>
+                                <div>
+                                    <label for="purchase_tax_rate" class="form-label">درصد مالیات خرید</label>
+                                    <input type="number" id="purchase_tax_rate" name="purchase_tax_rate" 
+                                           class="form-input" step="0.01" min="0" max="100">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- تب‌ها -->
-        <div class="mb-6">
-            <div class="flex border-b border-gray-200 mb-4">
-                <button type="button" data-tab="general" class="tab-button px-4 py-2 border-b-2 border-blue-500">عمومی</button>
-                <button type="button" data-tab="units" class="tab-button px-4 py-2">واحدها</button>
-                <button type="button" data-tab="inventory" class="tab-button px-4 py-2">موجودی</button>
-                <button type="button" data-tab="pricing" class="tab-button px-4 py-2">قیمت‌گذاری</button>
-                <button type="button" data-tab="tax" class="tab-button px-4 py-2">مالیات</button>
+            <!-- دکمه‌های فرم -->
+            <div class="flex justify-end gap-4 mt-6">
+                <button type="submit" name="add_product" class="btn btn-primary">
+                    <i class="fas fa-save ml-2"></i>
+                    ذخیره محصول
+                </button>
+                <a href="index.php" class="btn btn-secondary">
+                    <i class="fas fa-times ml-2"></i>
+                    انصراف
+                </a>
             </div>
+        </form>
+    </div>
+</div>
 
-            <!-- تب عمومی -->
-            <div id="general-tab" class="tab-content">
-                <div class="grid grid-cols-1 gap-6">
-                    <div>
-                        <label for="description" class="block text-sm font-medium text-gray-700">توضیحات:</label>
-                        <textarea id="description" name="description" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
-                    </div>
-                    <div>
-                        <label for="image" class="block text-sm font-medium text-gray-700">تصویر محصول:</label>
-                        <input type="file" id="image" name="image" accept="image/*" class="mt-1 block w-full">
-                    </div>
-                </div>
-            </div>
+<!-- کد جاوااسکریپت محاسبات مالی -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // محاسبه مالیات و قیمت نهایی به صورت خودکار
+    const priceFields = ['sale_price', 'sales_tax_rate', 'sales_tax_included'];
+    priceFields.forEach(field => {
+        const element = document.getElementById(field);
+        if (element) {
+            element.addEventListener('change', محاسبه_مالیات_و_قیمت_نهایی);
+        }
+    });
+});
 
-            <!-- تب واحدها -->
-            <div id="units-tab" class="tab-content hidden">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
-                        <label for="main_unit" class="block text-sm font-medium text-gray-700">واحد اصلی:</label>
-                        <select id="main_unit" name="main_unit" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                            <option value="عدد">عدد</option>
-                            <option value="کیلوگرم">کیلوگرم</option>
-                            <option value="متر">متر</option>
-                            <option value="لیتر">لیتر</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="sub_unit" class="block text-sm font-medium text-gray-700">واحد فرعی:</label>
-                        <select id="sub_unit" name="sub_unit" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                            <option value="">بدون واحد فرعی</option>
-                            <option value="عدد">عدد</option>
-                            <option value="کیلوگرم">کیلوگرم</option>
-                            <option value="متر">متر</option>
-                            <option value="لیتر">لیتر</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="conversion_factor" class="block text-sm font-medium text-gray-700">ضریب تبدیل:</label>
-                        <input type="number" id="conversion_factor" name="conversion_factor" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                    </div>
-                </div>
-            </div>
+// تابع محاسبه مالیات و قیمت نهایی
+function محاسبه_مالیات_و_قیمت_نهایی() {
+    const قیمت_فروش = parseFloat(document.getElementById('sale_price').value) || 0;
+    const درصد_مالیات = parseFloat(document.getElementById('sales_tax_rate').value) || 0;
+    const شامل_مالیات = document.getElementById('sales_tax_included').checked;
+    
+    let مبلغ_مالیات = 0;
+    let قیمت_نهایی = 0;
+    
+    if (شامل_مالیات) {
+        مبلغ_مالیات = (قیمت_فروش * درصد_مالیات) / (100 + درصد_مالیات);
+        قیمت_نهایی = قیمت_فروش;
+    } else {
+        مبلغ_مالیات = (قیمت_فروش * درصد_مالیات) / 100;
+        قیمت_نهایی = قیمت_فروش + مبلغ_مالیات;
+    }
+    
+    // نمایش نتایج
+    if (document.getElementById('tax_amount')) {
+        document.getElementById('tax_amount').value = Math.round(مبلغ_مالیات).toLocaleString('fa-IR');
+    }
+    if (document.getElementById('final_price')) {
+        document.getElementById('final_price').value = Math.round(قیمت_نهایی).toLocaleString('fa-IR');
+    }
+}
 
-            <!-- تب موجودی -->
-            <div id="inventory-tab" class="tab-content hidden">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="flex items-center">
-                            <input type="checkbox" id="stock_control" name="stock_control" class="rounded border-gray-300 text-blue-600 shadow-sm">
-                            <span class="ml-2">کنترل موجودی</span>
-                        </label>
-                    </div>
-                    <div>
-                        <label for="reorder_point" class="block text-sm font-medium text-gray-700">نقطه سفارش:</label>
-                        <input type="number" id="reorder_point" name="reorder_point" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                    </div>
-                    <div>
-                        <label for="lead_time" class="block text-sm font-medium text-gray-700">زمان انتظار (روز):</label>
-                        <input type="number" id="lead_time" name="lead_time" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                    </div>
-                    <div>
-                        <label for="min_order" class="block text-sm font-medium text-gray-700">حداقل سفارش:</label>
-                        <input type="number" id="min_order" name="min_order" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                    </div>
-                </div>
-            </div>
+// تابع تولید بارکد تصادفی
+function تولید_بارکد() {
+    const پیشوند = '200'; // پیشوند برای بارکدهای داخلی
+    const بخش_تصادفی = Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
+    document.getElementById('barcode').value = پیشوند + بخش_تصادفی;
+}
 
-            <!-- تب قیمت‌گذاری -->
-            <div id="pricing-tab" class="tab-content hidden">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="sale_price" class="block text-sm font-medium text-gray-700">قیمت فروش:</label>
-                        <input type="number" id="sale_price" name="sale_price" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                    </div>
-                    <div>
-                        <label for="purchase_price" class="block text-sm font-medium text-gray-700">قیمت خرید:</label>
-                        <input type="number" id="purchase_price" name="purchase_price" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                    </div>
-                    <div>
-                        <label for="sale_description" class="block text-sm font-medium text-gray-700">توضیحات فروش:</label>
-                        <textarea id="sale_description" name="sale_description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
-                    </div>
-                </div>
-            </div>
+// تابع اعتبارسنجی فرم
+function اعتبارسنجی_فرم() {
+    const فیلدهای_اجباری = [
+        { id: 'name', پیام: 'نام محصول را وارد کنید' },
+        { id: 'product_code', پیام: 'کد محصول را وارد کنید' },
+        { id: 'main_unit', پیام: 'واحد اصلی را انتخاب کنید' }
+    ];
+    
+    let معتبر_است = true;
+    const محل_خطاها = document.getElementById('form-errors');
+    محل_خطاها.innerHTML = '';
+    
+    فیلدهای_اجباری.forEach(فیلد => {
+        const المان = document.getElementById(فیلد.id);
+        if (!المان.value.trim()) {
+            معتبر_است = false;
+            محل_خطاها.innerHTML += `<div class="text-red-500 text-sm mb-1">${فیلد.پیام}</div>`;
+            المان.classList.add('border-red-500');
+        } else {
+            المان.classList.remove('border-red-500');
+        }
+    });
+    
+    return معتبر_است;
+}
+</script>
 
-            <!-- تب مالیات -->
-            <div id="tax-tab" class="tab-content hidden">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="flex items-center">
-                            <input type="checkbox" id="sales_tax_included" name="sales_tax_included" class="rounded border-gray-300 text-blue-600 shadow-sm">
-                            <span class="ml-2">مشمول مالیات فروش</span>
-                        </label>
-                        <div class="mt-2">
-                            <label for="sales_tax_rate" class="block text-sm font-medium text-gray-700">درصد مالیات فروش:</label>
-                            <input type="number" id="sales_tax_rate" name="sales_tax_rate" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="flex items-center">
-                            <input type="checkbox" id="purchase_tax_included" name="purchase_tax_included" class="rounded border-gray-300 text-blue-600 shadow-sm">
-                            <span class="ml-2">مشمول مالیات خرید</span>
-                        </label>
-                        <div class="mt-2">
-                            
+<?php require_once '../../templates/footer.php'; ?>

@@ -1,85 +1,178 @@
-/* استایل‌های عمومی */
+/* پایه فریم‌ورک */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* استایل‌های فارسی‌سازی */
+/* تنظیمات فونت */
 @font-face {
-    font-family: 'IRANSans';
-    src: url('../fonts/IRANSansWeb.woff2') format('woff2');
+    font-family: 'Vazir';
+    src: url('../fonts/Vazir.woff2') format('woff2');
     font-weight: normal;
-    font-style: normal;
+    font-display: swap;
 }
 
+@font-face {
+    font-family: 'Vazir';
+    src: url('../fonts/Vazir-Bold.woff2') format('woff2');
+    font-weight: bold;
+    font-display: swap;
+}
+
+/* تنظیمات پایه */
+:root {
+    --primary-color: #2563eb;
+    --success-color: #16a34a;
+    --warning-color: #ea580c;
+    --error-color: #dc2626;
+}
+
+/* استایل‌های عمومی */
 body {
-    font-family: 'IRANSans', system-ui, -apple-system, sans-serif;
+    font-family: 'Vazir', system-ui, sans-serif;
 }
 
-/* استایل‌های تب */
-.tab-button {
-    @apply px-6 py-3 text-sm font-medium transition-all duration-200;
+/* کامپوننت‌های سفارشی */
+@layer components {
+    /* دکمه‌ها */
+    .btn {
+        @apply px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200;
+    }
+
+    .btn-primary {
+        @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+    }
+
+    .btn-secondary {
+        @apply bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-2 focus:ring-gray-400 focus:ring-offset-2;
+    }
+
+    /* فیلدهای فرم */
+    .form-label {
+        @apply block text-sm font-medium text-gray-700 mb-1;
+    }
+
+    .form-input {
+        @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 
+        disabled:bg-gray-100 disabled:cursor-not-allowed;
+    }
+
+    .form-select {
+        @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500;
+    }
+
+    .form-checkbox {
+        @apply rounded border-gray-300 text-blue-600 focus:ring-blue-500;
+    }
+
+    .form-error {
+        @apply text-red-600 text-sm mt-1;
+    }
+
+    /* تب‌ها */
+    .tabs-container {
+        @apply border-b border-gray-200;
+    }
+
+    .tab-button {
+        @apply px-4 py-2 text-sm font-medium border-b-2 transition-all duration-200
+        hover:text-blue-600 hover:border-blue-500 focus:outline-none;
+    }
+
+    .tab-button.active {
+        @apply border-blue-500 text-blue-600;
+    }
+
+    .tab-content {
+        @apply p-4 bg-white rounded-b-lg transition-all duration-200;
+    }
+
+    /* کارت‌ها */
+    .card {
+        @apply bg-white rounded-lg shadow-sm p-4;
+    }
+
+    .card-header {
+        @apply flex items-center justify-between mb-4;
+    }
+
+    .card-title {
+        @apply text-lg font-bold text-gray-900;
+    }
+
+    /* جداول */
+    .table-container {
+        @apply overflow-x-auto rounded-lg border border-gray-200;
+    }
+
+    .table {
+        @apply min-w-full divide-y divide-gray-200;
+    }
+
+    .table th {
+        @apply px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50;
+    }
+
+    .table td {
+        @apply px-4 py-3 whitespace-nowrap text-sm text-gray-700;
+    }
+
+    /* هشدارها */
+    .alert {
+        @apply p-4 rounded-lg mb-4;
+    }
+
+    .alert-success {
+        @apply bg-green-50 text-green-700 border border-green-200;
+    }
+
+    .alert-error {
+        @apply bg-red-50 text-red-700 border border-red-200;
+    }
+
+    .alert-warning {
+        @apply bg-yellow-50 text-yellow-700 border border-yellow-200;
+    }
+
+    /* فیلدهای غیرفعال */
+    .disabled {
+        @apply opacity-60 cursor-not-allowed;
+    }
+
+    /* انیمیشن‌ها */
+    .fade-enter {
+        @apply transition-opacity duration-200 ease-in-out opacity-0;
+    }
+
+    .fade-enter-active {
+        @apply opacity-100;
+    }
+
+    .fade-exit {
+        @apply transition-opacity duration-200 ease-in-out opacity-100;
+    }
+
+    .fade-exit-active {
+        @apply opacity-0;
+    }
 }
 
-.tab-button.active {
-    @apply border-b-2 border-blue-500 text-blue-600;
+/* پشتیبانی از چاپ */
+@media print {
+    .no-print {
+        display: none;
+    }
 }
 
-.tab-content {
-    @apply p-6 bg-white rounded-lg shadow-sm;
-}
+/* بهینه‌سازی برای موبایل */
+@media (max-width: 640px) {
+    .tab-button {
+        @apply px-2 py-1 text-xs;
+    }
 
-/* استایل‌های فرم */
-.form-input {
-    @apply mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500;
+    .form-label {
+        @apply text-xs;
+    }
 }
-
-.form-label {
-    @apply block text-sm font-medium text-gray-700 mb-1;
-}
-
-.form-checkbox {
-    @apply rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500;
-}
-
-.form-select {
-    @apply mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500;
-}
-
-/* استایل‌های دکمه‌ها */
-.btn {
-    @apply px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200;
-}
-
-.btn-primary {
-    @apply bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
-}
-
-.btn-secondary {
-    @apply bg-gray-100 text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
-}
-
-/* استایل‌های اعتبارسنجی */
-.input-error {
-    @apply border-red-500 focus:border-red-500 focus:ring-red-500;
-}
-
-.error-message {
-    @apply mt-1 text-sm text-red-600;
-}
-
-/* استایل‌های جدول */
-.table-container {
-    @apply overflow-x-auto rounded-lg border border-gray-200;
-}
-
-.table {
-    @apply min-w-full divide-y divide-gray-200;
-}
-
-.table th {
-    @apply px-6 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider;
-}
-
-.table td {
-    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-500;
+.group:hover .group-hover\:block {
+    margin-top: 0 !important;
 }

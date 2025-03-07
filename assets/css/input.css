@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* تعریف فونت وزیر */
+@font-face {
+    font-family: Vazir FD;
+    src: url('/assets/fonts/farsi/Vazir-Regular-FD.eot');
+    src: url('/assets/fonts/farsi/Vazir-Regular-FD.eot?#iefix') format('embedded-opentype'),
+         url('/assets/fonts/farsi/Vazir-Regular-FD.woff2') format('woff2'),
+         url('/assets/fonts/farsi/Vazir-Regular-FD.woff') format('woff'),
+         url('/assets/fonts/farsi/Vazir-Regular-FD.ttf') format('truetype');
+    font-weight: normal;
+    font-display:swap;
+  }
+
+/* تعریف کلاس‌های سفارشی */
+@layer components {
+    .form-input {
+        @apply mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500;
+    }
+    .btn-primary {
+        @apply bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors;
+    }
+    .tab-button {
+        @apply px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 border-b-2 border-transparent;
+    }
+    .tab-button.active {
+        @apply text-blue-600 border-blue-500;
+    }
+}

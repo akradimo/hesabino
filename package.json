@@ -1,27 +1,14 @@
 {
   "name": "hesabino",
   "version": "1.0.0",
-  "description": "پروژه مدیریت فروش",
-  "main": "index.php",
   "scripts": {
-    "start": "php -S localhost:8000"
+    "dev": "npx tailwindcss -i ./assets/css/input.css -o ./assets/css/styles.css --watch",
+    "build": "npx tailwindcss -i ./assets/css/input.css -o ./assets/css/styles.css --minify"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.0.11",
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.5.3",
-    "tailwindcss": "^3.4.17"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/akradimo/hesabino.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/akradimo/hesabino/issues"
-  },
-  "homepage": "https://github.com/akradimo/hesabino#readme"
+    "@tailwindcss/forms": "^0.5.7",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1"
+  }
 }
