@@ -1,28 +1,27 @@
+
+<?php require_once __DIR__ . '/../includes/config.php'; ?>
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#2563eb">
     <title>حسابینو - سیستم حسابداری آنلاین</title>
     
     <!-- استایل‌ها -->
+    <link rel="stylesheet" href="<?= asset('css/styles.css') ?>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css">
-    <link rel="stylesheet" href="/assets/css/styles.css">
     
     <!-- اسکریپت‌ها -->
-    <script src="/assets/js/tabs.js" defer></script>
-    <script src="/assets/js/persian.js" defer></script>
+    <script src="<?= asset('js/persian.js') ?>" defer></script>
+    <script src="<?= asset('js/tabs.js') ?>" defer></script>
 </head>
-<body class="bg-gray-50">
-    <!-- منوی اصلی -->
-    <nav class="bg-white shadow-sm sticky top-0 z-50">
+<body>
+    <nav class="bg-white shadow-sm">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between h-16">
-                <!-- لوگو و نام سیستم -->
-                <div class="flex items-center">
-                    <a href="/" class="flex items-center">
-                        <img src="/public/assets/images/logo.png" alt="حسابینو" class="h-8 w-auto">
+                <div class="flex">
+                    <a href="<?= url() ?>" class="flex items-center">
+                        <img src="<?= asset('images/logo.png') ?>" alt="حسابینو" class="h-8 w-8">
                         <span class="text-xl font-bold text-blue-600 mr-2">حسابینو</span>
                     </a>
                 </div>

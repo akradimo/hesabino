@@ -1,135 +1,86 @@
-// مدیریت تب‌ها و عملیات محصولات
+// مدیریت تب‌ها و رویدادها
 document.addEventListener('DOMContentLoaded', function() {
-    // انتخاب همه دکمه‌های تب
-    const دکمه_های_تب = document.querySelectorAll('.tab-button');
-    
-    // فعال کردن تب اول به صورت پیش‌فرض
-    const تب_اول = document.querySelector('.tab-button');
-    if (تب_اول) {
-        تب_اول.click();
-    }
-    
-    // اضافه کردن رویداد کلیک به هر دکمه تب
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            // حذف کلاس فعال از همه دکمه‌ها
-            tabButtons.forEach(btn => {
-                btn.classList.remove('active', 'border-blue-500', 'text-blue-600');
-                btn.classList.add('text-gray-600', 'border-transparent');
-            });
-            
-            // فعال کردن دکمه کلیک شده
-            button.classList.add('active', 'border-blue-500', 'text-blue-600');
-            button.classList.remove('text-gray-600', 'border-transparent');
-            
-            // نمایش محتوای تب مربوطه
-            const tabId = button.getAttribute('data-tab');
-            const allTabContents = document.querySelectorAll('.tab-content');
-            allTabContents.forEach(content => content.classList.add('hidden'));
-            
-            const selectedTab = document.getElementById(tabId + '-tab');
-            if (selectedTab) {
-                selectedTab.classList.remove('hidden');
-            }
-        });
+    // متغیرهای سراسری
+    const تب_ها = {
+        دکمه_ها: document.querySelectorAll('.tab-button'),
+        محتواها: document.querySelectorAll('.tab-content')
+    };
+
+    // فعال‌سازی تب اول در شروع
+    فعال_کردن_تب_اول();
+
+    // اضافه کردن رویداد کلیک به تب‌ها
+    تب_ها.دکمه_ها.forEach(دکمه => {
+        دکمه.addEventListener('click', () => تغییر_تب(دکمه));
     });
 
-    // تولید خودکار بارکد محصول
-    const barcodeBtn = document.querySelector('[data-action="generate-barcode"]');
-    if (barcodeBtn) {
-        barcodeBtn.addEventListener('click', () => {
-            const prefix = '200'; // پیشوند ثابت برای بارکدهای داخلی
-            const randomPart = Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
-            document.getElementById('barcode').value = prefix + randomPart;
-        });
+    // تولید بارکد خودکار
+    const دکمه_بارکد = document.querySelector('[data-action="generate-barcode"]');
+    if (دکمه_بارکد) {
+        دکمه_بارکد.addEventListener('click', تولید_بارکد_خودکار);
     }
 
-    // محاسبه خودکار مالیات
-    const calculateTaxElements = ['sale_price', 'sales_tax_rate', 'sales_tax_included'];
-    calculateTaxElements.forEach(elementId => {
-        const element = document.getElementById(elementId);
-        if (element) {
-            element.addEventListener('change', calculateTaxAndTotal);
-        }
-    });
-
-    // تبدیل واحد به صورت خودکار
-    const conversionElements = ['main_unit', 'sub_unit', 'conversion_factor'];
-    conversionElements.forEach(elementId => {
-        const element = document.getElementById(elementId);
-        if (element) {
-            element.addEventListener('change', handleUnitConversion);
+    // رویدادهای محاسبه مالیات
+    ['sale_price', 'sales_tax_rate', 'sales_tax_included'].forEach(فیلد => {
+        const المان = document.getElementById(فیلد);
+        if (المان) {
+            المان.addEventListener('change', محاسبه_مالیات);
         }
     });
 });
 
-// محاسبه مالیات و قیمت نهایی
-function calculateTaxAndTotal() {
-    const salePrice = parseFloat(document.getElementById('sale_price').value) || 0;
-    const taxRate = parseFloat(document.getElementById('sales_tax_rate').value) || 0;
-    const isTaxIncluded = document.getElementById('sales_tax_included').checked;
-    
-    let taxAmount = 0;
-    let totalPrice = 0;
-    
-    if (isTaxIncluded) {
-        // محاسبه مالیات از قیمت شامل مالیات
-        taxAmount = (salePrice * taxRate) / (100 + taxRate);
-        totalPrice = salePrice;
-    } else {
-        // محاسبه مالیات و اضافه کردن به قیمت پایه
-        taxAmount = (salePrice * taxRate) / 100;
-        totalPrice = salePrice + taxAmount;
-    }
-    
-    // نمایش نتایج در فرم
-    if (document.getElementById('tax_amount')) {
-        document.getElementById('tax_amount').value = taxAmount.toFixed(0);
-    }
-    if (document.getElementById('total_price')) {
-        document.getElementById('total_price').value = totalPrice.toFixed(0);
+// توابع اصلی
+function فعال_کردن_تب_اول() {
+    const تب_اول = document.querySelector('.tab-button');
+    if (تب_اول) {
+        تغییر_تب(تب_اول);
     }
 }
 
-// مدیریت تبدیل واحدها
-function handleUnitConversion() {
-    const mainUnit = document.getElementById('main_unit').value;
-    const subUnit = document.getElementById('sub_unit').value;
-    const factor = document.getElementById('conversion_factor');
-    
-    // اگر واحد اصلی و فرعی یکسان باشند
-    if (mainUnit === subUnit) {
-        factor.value = '1';
-        factor.setAttribute('readonly', true);
-    } else {
-        factor.removeAttribute('readonly');
-    }
-}
-
-// اعتبارسنجی فرم قبل از ارسال
-function validateProductForm() {
-    const requiredFields = [
-        { id: 'name', message: 'نام محصول الزامی است' },
-        { id: 'product_code', message: 'کد محصول الزامی است' },
-        { id: 'main_unit', message: 'واحد اصلی الزامی است' }
-    ];
-    
-    let isValid = true;
-    const errorContainer = document.getElementById('form-errors');
-    errorContainer.innerHTML = '';
-    
-    requiredFields.forEach(field => {
-        const element = document.getElementById(field.id);
-        const value = element.value.trim();
-        
-        if (!value) {
-            isValid = false;
-            errorContainer.innerHTML += `<div class="text-red-500 text-sm mb-1">${field.message}</div>`;
-            element.classList.add('border-red-500');
-        } else {
-            element.classList.remove('border-red-500');
-        }
+function تغییر_تب(دکمه_فعال) {
+    // غیرفعال کردن همه تب‌ها
+    document.querySelectorAll('.tab-button').forEach(دکمه => {
+        دکمه.classList.remove('active', 'border-blue-500', 'text-blue-600');
+        دکمه.classList.add('text-gray-700', 'border-transparent');
     });
-    
-    return isValid;
+
+    // فعال کردن تب انتخاب شده
+    دکمه_فعال.classList.add('active', 'border-blue-500', 'text-blue-600');
+    دکمه_فعال.classList.remove('text-gray-700', 'border-transparent');
+
+    // نمایش محتوای تب
+    const شناسه_تب = دکمه_فعال.getAttribute('data-tab');
+    document.querySelectorAll('.tab-content').forEach(محتوا => محتوا.classList.add('hidden'));
+    document.getElementById(شناسه_تب + '-tab')?.classList.remove('hidden');
+}
+
+function تولید_بارکد_خودکار() {
+    const پیشوند = '200';
+    const بخش_تصادفی = Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
+    document.getElementById('barcode').value = پیشوند + بخش_تصادفی;
+}
+
+function محاسبه_مالیات() {
+    const قیمت = parseFloat(document.getElementById('sale_price').value) || 0;
+    const نرخ_مالیات = parseFloat(document.getElementById('sales_tax_rate').value) || 0;
+    const شامل_مالیات = document.getElementById('sales_tax_included').checked;
+
+    let مبلغ_مالیات = 0;
+    let قیمت_نهایی = 0;
+
+    if (شامل_مالیات) {
+        مبلغ_مالیات = (قیمت * نرخ_مالیات) / (100 + نرخ_مالیات);
+        قیمت_نهایی = قیمت;
+    } else {
+        مبلغ_مالیات = (قیمت * نرخ_مالیات) / 100;
+        قیمت_نهایی = قیمت + مبلغ_مالیات;
+    }
+
+    // نمایش نتایج با فرمت فارسی
+    if (document.getElementById('tax_amount')) {
+        document.getElementById('tax_amount').value = new Intl.NumberFormat('fa-IR').format(Math.round(مبلغ_مالیات));
+    }
+    if (document.getElementById('final_price')) {
+        document.getElementById('final_price').value = new Intl.NumberFormat('fa-IR').format(Math.round(قیمت_نهایی));
+    }
 }
