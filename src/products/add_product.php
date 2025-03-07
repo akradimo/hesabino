@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
     }
 
     // ذخیره محصول در دیتابیس
-    $sql = "INSERT INTO products (name, barcode, category_id, sale_price, sale_description, purchase_price, purchase_description, unit, general_description, control_stock, reorder_point, min_order, lead_time, image) 
+    $sql = "INSERT INTO products (name, barcode, category_id, sale_price, sale_description, purchase_price, purchase_description, unit, general_description, control_stock, reorder_point, min_order, lead_time, image)
             VALUES ('$name', '$barcode', '$category_id', '$sale_price', '$sale_description', '$purchase_price', '$purchase_description', '$unit', '$general_description', '$control_stock', '$reorder_point', '$min_order', '$lead_time', '$image_name')";
     if ($db->query($sql)) {
         echo "<p class='bg-green-100 text-green-800 p-2 rounded'>محصول با موفقیت افزوده شد.</p>";
@@ -45,6 +45,32 @@ $categories = $db->query("SELECT * FROM categories");
     <h2 class="text-2xl font-bold mb-4">افزودن محصول جدید</h2>
 
     <form method="POST" action="" enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow-md">
+        <!-- تصویر محصول -->
+        <div class="col col-md-auto text-center" id="image" style="width: 280px;">
+            <div class="image mt-3 mt-md-5">
+                <img alt="product image" src="https://coredemo.hesabfa.com/api/bdata/other/product.jpg">
+            </div>
+            <br>
+            <app-file-upload accept="image/*" stylingmode="text" type="default">
+                <dx-button class="container dx-button dx-button-default dx-button-mode-text dx-widget dx-rtl" tabindex="0" role="button" style="width: 80px;">
+                    <div class="dx-button-content">
+                        <span class="dx-button-text">انتخاب</span>
+                        <input class="file-upload" type="file" accept="image/*">
+                    </div>
+                </dx-button>
+            </app-file-upload>
+            <dx-button stylingmode="text" type="default" class="dx-button dx-button-default dx-button-mode-text dx-widget dx-state-invisible dx-rtl dx-button-has-text" aria-label="دوربین" aria-hidden="true" tabindex="0" role="button" style="width: 100px;">
+                <div class="dx-button-content">
+                    <span class="dx-button-text">دوربین</span>
+                </div>
+            </dx-button>
+            <dx-button stylingmode="text" type="danger" class="dx-button dx-button-danger dx-button-mode-text dx-widget dx-rtl dx-button-has-text" aria-label="حذف" tabindex="0" role="button" style="width: 80px;">
+                <div class="dx-button-content">
+                    <span class="dx-button-text">حذف</span>
+                </div>
+            </dx-button>
+        </div>
+
         <!-- نام محصول -->
         <div class="mb-6">
             <label for="name" class="block text-sm font-medium text-gray-700">نام محصول:</label>
@@ -69,12 +95,6 @@ $categories = $db->query("SELECT * FROM categories");
                     <option value="<?php echo $category['id']; ?>"><?php echo $category['name']; ?></option>
                 <?php endwhile; ?>
             </select>
-        </div>
-
-        <!-- تصویر -->
-        <div class="mb-6">
-            <label for="image" class="block text-sm font-medium text-gray-700">تصویر محصول:</label>
-            <input type="file" id="image" name="image" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
         </div>
 
         <!-- تب‌ها -->
@@ -161,6 +181,7 @@ $categories = $db->query("SELECT * FROM categories");
     </form>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="../../assets/js/tabs.js"></script>
 <script>
 // تابع تولید خودکار بارکد

@@ -24,10 +24,7 @@ body {
     color: #3b82f6;
 }
 
-.tab-content {
-    display: none;
-    padding: 1rem 0;
-}
+
 
 .tab-content.active {
     display: block;
@@ -35,7 +32,7 @@ body {
 
 /* استایل هشدار حداقل سفارش */
 #min-order-warning {
-    display: none;
+
 }
 
 #min-order-warning.show {
