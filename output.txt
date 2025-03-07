@@ -1,98 +1,88 @@
 Folder PATH listing
-Volume serial number is 00000197 1A06:CD02
+Volume serial number is 00000229 1A06:CD02
 C:.
 ³   .gitattributes
 ³   abc.txt
 ³   api.php
+³   database.sql
+³   file accsept.txt
 ³   index.php
+³   node_modules.zip
 ³   output.txt
 ³   package-lock.json
 ³   package.json
+³   project.zip
 ³   README.md
 ³   src.txt
+³   tailwind.config.js
 ³   
 ÃÄÄÄassets
-³   ÀÄÄÄcss
-³           style.css
+³   ÃÄÄÄcss
+³   ³       style.css
+³   ³       
+³   ÃÄÄÄimages
+³   ³   ÀÄÄÄproducts
+³   ÀÄÄÄjs
+³           postcss.config.js
+³           tabs.js
 ³           
+ÃÄÄÄdist
+³       output.css
+³       
 ÃÄÄÄincludes
 ³       config.php
 ³       db.php
 ³       
-ÃÄÄÄnode_modules
-³   ³   .package-lock.json
-³   ³   
-³   ÀÄÄÄtailwindcss
-³       ³   index.css
-³       ³   LICENSE
-³       ³   package.json
-³       ³   preflight.css
-³       ³   README.md
-³       ³   theme.css
-³       ³   utilities.css
-³       ³   
-³       ÀÄÄÄdist
-³               chunk-7GINGMIH.mjs
-³               chunk-AZANAYY2.mjs
-³               chunk-V2K3XTS4.mjs
-³               colors-b_6i0Oi7.d.ts
-³               colors.d.mts
-³               colors.d.ts
-³               colors.js
-³               colors.mjs
-³               default-theme.d.mts
-³               default-theme.d.ts
-³               default-theme.js
-³               default-theme.mjs
-³               flatten-color-palette.d.mts
-³               flatten-color-palette.d.ts
-³               flatten-color-palette.js
-³               flatten-color-palette.mjs
-³               lib.d.mts
-³               lib.d.ts
-³               lib.js
-³               lib.mjs
-³               plugin.d.mts
-³               plugin.d.ts
-³               plugin.js
-³               plugin.mjs
-³               resolve-config-BIFUA2FY.d.ts
-³               resolve-config-QUZ9b-Gn.d.mts
-³               types-B254mqw1.d.mts
-³               
 ÃÄÄÄsrc
-³   ³   advanced_reports.php
 ³   ³   categories.php
 ³   ³   discounts.php
-³   ³   edit_product.php
-³   ³   edit_service.php
-³   ³   events.php
-³   ³   feedbacks.php
+³   ³   input.css
 ³   ³   inventory.php
 ³   ³   login.php
 ³   ³   logout.php
-³   ³   payment.php
-³   ³   payment_callback.php
-³   ³   sales_report.php
 ³   ³   send_email.php
 ³   ³   send_sms.php
-³   ³   users.php
 ³   ³   
+³   ÃÄÄÄcategories
+³   ³       categories.php
+³   ³       delete_category.php
+³   ³       edit_category.php
+³   ³       
 ³   ÃÄÄÄchat
 ³   ³       chat.php
 ³   ³       get_messages.php
 ³   ³       
+³   ÃÄÄÄevents
+³   ³       events.php
+³   ³       
+³   ÃÄÄÄfeedbacks
+³   ³       feedbacks.php
+³   ³       
+³   ÃÄÄÄpayment
+³   ³       payment.php
+³   ³       payment_callback.php
+³   ³       
 ³   ÃÄÄÄproducts
 ³   ³       add_product.php
+³   ³       delete_product.php
+³   ³       edit_product.php
 ³   ³       products.php
+³   ³       
+³   ÃÄÄÄreports
+³   ³       advanced_reports.php
 ³   ³       
 ³   ÃÄÄÄsales
 ³   ³       edit_sale.php
 ³   ³       sales.php
+³   ³       sales_report.php
 ³   ³       
-³   ÀÄÄÄservices
-³           add_service.php
-³           services.php
+³   ÃÄÄÄservices
+³   ³       add_service.php
+³   ³       edit_service.php
+³   ³       services.php
+³   ³       
+³   ÀÄÄÄusers
+³           users.php
 ³           
 ÀÄÄÄtemplates
         footer.php

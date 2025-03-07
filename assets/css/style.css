@@ -41,3 +41,11 @@ body {
 #min-order-warning.show {
     display: block;
 }
+.hidden {
+    display: none;
+}
+
+.active {
+    background-color: #3b82f6; /* رنگ آبی */
+    color: white;
+}
